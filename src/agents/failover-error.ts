@@ -163,6 +163,9 @@ export function resolveFailoverReasonFromError(err: unknown): FailoverReason | n
   if (status === 400) {
     return "format";
   }
+  if (status === 500 || status === 502 || status === 503) {
+    return "unknown";
+  }
 
   const code = (getErrorCode(err) ?? "").toUpperCase();
   if (["ETIMEDOUT", "ESOCKETTIMEDOUT", "ECONNRESET", "ECONNABORTED"].includes(code)) {

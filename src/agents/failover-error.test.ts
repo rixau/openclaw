@@ -12,6 +12,20 @@ describe("failover-error", () => {
     expect(resolveFailoverReasonFromError({ status: 403 })).toBe("auth");
     expect(resolveFailoverReasonFromError({ status: 408 })).toBe("timeout");
     expect(resolveFailoverReasonFromError({ status: 400 })).toBe("format");
+    expect(resolveFailoverReasonFromError({ status: 500 })).toBe("unknown");
+    expect(resolveFailoverReasonFromError({ status: 502 })).toBe("unknown");
+    expect(resolveFailoverReasonFromError({ status: 503 })).toBe("unknown");
+  });
+
+  it("coerces HTTP 500 server errors into FailoverError for model fallback", () => {
+    const err = coerceToFailoverError(
+      { status: 500, message: "insufficient balance" },
+      { provider: "minimax-portal", model: "MiniMax-M2.1" },
+    );
+    expect(err?.name).toBe("FailoverError");
+    expect(err?.reason).toBe("unknown");
+    expect(err?.provider).toBe("minimax-portal");
+    expect(err?.model).toBe("MiniMax-M2.1");
   });
 
   it("infers format errors from error messages", () => {
